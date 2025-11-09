@@ -1,0 +1,43 @@
+name: Matrix Build with Artifacts
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14, 16, 18]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: matrix-33b618b
+        run: |
+          echo "Running matrix job for Node.js version ${{ matrix.node-version }}"
+          echo "matrix_variant=${{ matrix.node-version }}" > matrix-33b618b-meta.txt
+
+      - name: Run a sample build (create artifact file)
+        run: |
+          ARTFILE="build-33b618b-node${{ matrix.node-version }}.txt"
+          echo "Build artifact for Node ${{ matrix.node-version }}" > "$ARTFILE"
+          echo "generated_at=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >> "$ARTFILE"
+          echo "matrix_variant=${{ matrix.node-version }}" >> "$ARTFILE"
+          echo "=== $ARTFILE contents ==="
+          cat "$ARTFILE"
+
+      - name: Upload artifact for this variant
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-33b618b-node${{ matrix.node-version }}
+          path: build-33b618b-node${{ matrix.node-version }}.txt
